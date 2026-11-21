@@ -9,16 +9,12 @@
       --bg: #0f0f11;
       --surface: #18181c;
       --surface-2: #222228;
-      --surface-3: #2a2a32;
       --border: rgba(255,255,255,0.08);
       --text: #f5f5f7;
       --muted: #9a9aa6;
       --purple: #7c5cff;
-      --purple-2: #6847f5;
       --green: #72e354;
-      --green-dark: #1d4d1b;
       --orange: #f97316;
-      --diamond: #38bdf8;
     }
 
     * {
@@ -227,21 +223,10 @@
 
     .banner:active { transform: scale(0.99); }
 
-    .banner-rocket {
-      background: linear-gradient(115deg, #2563eb 0%, #3b82f6 55%, #60a5fa 100%);
-    }
-
-    .banner-pvp {
-      background: linear-gradient(115deg, #b45309 0%, #d97706 50%, #f59e0b 100%);
-    }
-
-    .banner-playhub {
-      background: linear-gradient(115deg, #4c1d95 0%, #6d28d9 55%, #7e22ce 100%);
-    }
-
-    .banner-upgrade {
-      background: linear-gradient(115deg, #15803d 0%, #16a34a 55%, #22c55e 100%);
-    }
+    .banner-rocket { background: linear-gradient(115deg, #2563eb 0%, #3b82f6 55%, #60a5fa 100%); }
+    .banner-pvp { background: linear-gradient(115deg, #b45309 0%, #d97706 50%, #f59e0b 100%); }
+    .banner-playhub { background: linear-gradient(115deg, #4c1d95 0%, #6d28d9 55%, #7e22ce 100%); }
+    .banner-upgrade { background: linear-gradient(115deg, #15803d 0%, #16a34a 55%, #22c55e 100%); }
 
     .pill-badge {
       display: inline-flex;
@@ -655,4 +640,693 @@
       flex-direction: column;
       align-items: center;
       gap: 3px;
-      font-size
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      padding: 4px 2px;
+    }
+
+    .nav-btn.active { color: #fff; }
+
+    .nav-btn.active .nav-icon-wrap {
+      background: var(--purple);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(124,92,255,0.45);
+    }
+
+    .nav-icon-wrap {
+      width: 36px;
+      height: 28px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .badge-dot {
+      position: absolute;
+      top: 2px;
+      right: 12px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 440px;
+      max-height: 86vh;
+      overflow-y: auto;
+      background: #18181d;
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--surface-2);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      top: 64px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #23232c;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.14);
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 60;
+      display: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="tg-bar">
+      <button class="tg-pill" onclick="goBack()">‹ Back</button>
+      <div class="tg-title">🎁 Epic Gift</div>
+      <div class="tg-pill" onclick="showToast('Demo Mini App active')">⌄ •••</div>
+    </div>
+
+    <div class="header-bal">
+      <div class="user-left">
+        <div class="avatar-wrap">
+          <div class="avatar">👾</div>
+          <div class="avatar-badge">💎</div>
+        </div>
+        <div>
+          <div class="bal-label">Your balance</div>
+          <div class="bal-val">💎 <span id="balanceText">50.000</span></div>
+        </div>
+      </div>
+      <button class="deposit-btn" onclick="openDepositModal()">👛 Deposit</button>
+    </div>
+
+    <div class="live-strip" id="liveStrip"></div>
+
+    <div id="viewContainer" class="content"></div>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn" data-tab="backpack" onclick="switchTab('backpack')">
+        <div class="nav-icon-wrap">📦</div>
+        <span>Backpack</span>
+      </button>
+      <button class="nav-btn" data-tab="invite" onclick="switchTab('invite')">
+        <div class="nav-icon-wrap">👥</div>
+        <span>Invite</span>
+      </button>
+      <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">
+        <div class="nav-icon-wrap">🏠</div>
+        <span>Home</span>
+      </button>
+      <button class="nav-btn" data-tab="leaderboard" onclick="switchTab('leaderboard')">
+        <div class="nav-icon-wrap">🏆</div>
+        <span>Leaderboard</span>
+      </button>
+      <button class="nav-btn" data-tab="earn" onclick="switchTab('earn')">
+        <span class="badge-dot">1</span>
+        <div class="nav-icon-wrap">🪙</div>
+        <span>Earn</span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal-sheet" id="modalSheet" onclick="event.stopPropagation()"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const GIFTS_CATALOG = [
+      { id: "santa_hat", name: "Santa Hat", emoji: "🎅", price: 7.11 },
+      { id: "liberty", name: "Liberty Figure", emoji: "🗽", price: 6.14 },
+      { id: "money_pot", name: "Money Pot", emoji: "🏺", price: 5.85 },
+      { id: "candle", name: "B-Day Candle", emoji: "🕯️", price: 5.45 },
+      { id: "egg", name: "Easter Egg", emoji: "🥚", price: 5.06 },
+      { id: "berry_box", name: "Berry Box", emoji: "🍫", price: 16.00 },
+      { id: "toy_bear", name: "Toy Bear", emoji: "🧸", price: 35.27 },
+      { id: "candle_gold", name: "Eternal Candle", emoji: "🪔", price: 47.12 },
+      { id: "ring", name: "Bonded Ring", emoji: "💍", price: 42.50 },
+      { id: "globe", name: "Snow Globe", emoji: "🔮", price: 48.90 },
+      { id: "bunny", name: "Jelly Bunny", emoji: "🐰", price: 46.32 },
+      { id: "mushroom", name: "Spy Agaric", emoji: "🍄", price: 49.83 },
+      { id: "muffin", name: "Bunny Muffin", emoji: "🧁", price: 50.36 }
+    ];
+
+    const CASES_CATALOG = [
+      { id: "movie_box", name: "Movie Box", price: 12.00, art: "🎬", items: ["🤖", "🌋", "🛸", "🕵️", "🦇", "🎭"] },
+      { id: "money", name: "Money", price: 8.00, art: "💵", items: ["💰", "💎", "👑", "🏆", "🪙", "💳"] },
+      { id: "pepe", name: "Pepe", price: 15.00, art: "🐸", items: ["🐸", "🎩", "🕶️", "🔥", "⚡", "🌈"] },
+      { id: "black", name: "Black", price: 20.00, art: "🧢", items: ["🧢", "🪖", "🖤", "⚔️", "🔮", "🌑"] },
+      { id: "onyx_black", name: "Onyx Black", price: 8.00, art: "👜", items: ["👜", "🍑", "🛞", "🔨", "🖤", "✨"] },
+      { id: "champion", name: "Champion", price: 25.00, art: "🏅", items: ["🏅", "🏆", "🥇", "🔥", "💪", "🚀"] }
+    ];
+
+    const LIVE_ICONS = [
+      { e: "🧸", bg: "#7c3aed" },
+      { e: "🌸", bg: "#4338ca" },
+      { e: "🚬", bg: "#d97706" },
+      { e: "💛", bg: "#78350f" },
+      { e: "🍫", bg: "#0284c7" },
+      { e: "🎁", bg: "#9333ea" },
+      { e: "💎", bg: "#0f766e" }
+    ];
+
+    const state = {
+      balance: 50.0,
+      tab: "home",
+      screen: "home",
+      selectedCase: CASES_CATALOG[0],
+      backpack: [
+        Object.assign({}, GIFTS_CATALOG[1], { uid: "u1" }),
+        Object.assign({}, GIFTS_CATALOG[2], { uid: "u2" }),
+        Object.assign({}, GIFTS_CATALOG[0], { uid: "u3" })
+      ],
+      upgradeSelectedIds: ["u1", "u2"],
+      targetGift: GIFTS_CATALOG[5],
+      chance: 74.9,
+      needleDeg: 0,
+      isSpinning: false,
+      minesGrid: [],
+      minesOpened: [],
+      minesActive: false,
+      minesMult: 1.0
+    };
+
+    let toastTimer = null;
+
+    function formatBal(val) {
+      const n = Number(val) || 0;
+      return n.toFixed(3).replace(/\.?0+$/, function(m) {
+        return m.length > 2 ? m : n.toFixed(2);
+      });
+    }
+
+    function updateBalanceUI() {
+      const el = document.getElementById("balanceText");
+      if (el) el.textContent = formatBal(state.balance);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      if (!t) return;
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() {
+        t.style.display = "none";
+      }, 2200);
+    }
+
+    function renderLiveStrip() {
+      const el = document.getElementById("liveStrip");
+      if (!el) return;
+      el.innerHTML =
+        '<div class="live-tag"><span class="live-dot"></span>Live</div>' +
+        LIVE_ICONS.map(function(x) {
+          return '<div class="live-chip" style="background:' + x.bg + '">' + x.e + '</div>';
+        }).join("");
+    }
+
+    function switchTab(tab) {
+      state.tab = tab;
+      document.querySelectorAll(".nav-btn").forEach(function(b) {
+        b.classList.toggle("active", b.dataset.tab === tab);
+      });
+      state.screen = tab === "home" ? "home" : tab;
+      render();
+    }
+
+    function goBack() {
+      if (state.screen !== "home") {
+        state.screen = "home";
+        state.tab = "home";
+        document.querySelectorAll(".nav-btn").forEach(function(b) {
+          b.classList.toggle("active", b.dataset.tab === "home");
+        });
+        render();
+      } else {
+        showToast("You are on Home");
+      }
+    }
+
+    function openDepositModal() {
+      const sheet = document.getElementById("modalSheet");
+      sheet.innerHTML =
+        '<div class="modal-head"><strong>Free Balance Top-Up</strong><button class="close-btn" onclick="closeModal()">✕</button></div>' +
+        '<p style="font-size:13px;color:#a1a1aa;margin-top:0">Free demo deposit enabled — add diamonds anytime:</p>' +
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">' +
+          '<button class="cta-green" style="padding:11px;font-size:14px" onclick="addFreeBalance(25)">+25 💎</button>' +
+          '<button class="cta-green" style="padding:11px;font-size:14px" onclick="addFreeBalance(100)">+100 💎</button>' +
+          '<button class="cta-green" style="padding:11px;font-size:14px" onclick="addFreeBalance(500)">+500 💎</button>' +
+        '</div>';
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+
+    function addFreeBalance(amount) {
+      state.balance += amount;
+      updateBalanceUI();
+      closeModal();
+      showToast("Added +" + amount + " 💎 for free!");
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== document.getElementById("modalBackdrop")) return;
+      document.getElementById("modalBackdrop").classList.remove("open");
+    }
+
+    function renderHome() {
+      const casesHtml = CASES_CATALOG.map(function(c) {
+        return (
+          '<div class="case-card" onclick="openCaseById(\'' + c.id + '\')">' +
+            '<div class="case-art">' + c.art + '</div>' +
+            '<div class="case-foot">' +
+              '<span class="case-name">' + c.name + '</span>' +
+              '<span class="price-chip">' + c.price + ' 💎</span>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("");
+
+      return (
+        '<div class="banner banner-rocket" onclick="quickWin(\'ROCKET\', 2.4)">' +
+          '<span class="pill-badge">🔥 HOT</span>' +
+          '<div><div class="banner-title">🚀 ROCKET</div><div class="banner-sub">Tap to launch multiplier demo</div></div>' +
+        '</div>' +
+        '<div class="banner banner-pvp" onclick="quickWin(\'PVP HUB\', 5)">' +
+          '<span class="pill-badge">⚡ NEW</span>' +
+          '<div><div class="banner-title">⚔️ PVP HUB</div><div class="banner-sub">SOLO • TEAM match preview</div></div>' +
+        '</div>' +
+        '<div class="banner banner-playhub" onclick="openUpgrade()">' +
+          '<div><div class="banner-title">🎮 PLAY HUB</div><div class="banner-sub">Upgrade • Plinko • Mines</div></div>' +
+        '</div>' +
+        '<div class="two-col">' +
+          '<div class="free-card" onclick="addFreeBalance(10)">' +
+            '<div style="font-size:12px;font-weight:900;color:#facc15">FREE 24</div>' +
+            '<div style="font-size:32px;margin:8px 0">💍</div>' +
+            '<div style="font-size:12px;color:#d4d4d8">Claim +10 💎</div>' +
+          '</div>' +
+          '<div class="free-card pink" onclick="addFreeBalance(15)">' +
+            '<div style="font-size:12px;font-weight:900;color:#f472b6">FREE</div>' +
+            '<div style="font-size:32px;margin:8px 0">🪖</div>' +
+            '<div style="font-size:12px;color:#d4d4d8">Claim +15 💎</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="banner banner-upgrade" onclick="openUpgrade()">' +
+          '<span class="pill-badge">🔥 HOT</span>' +
+          '<div>' +
+            '<div class="banner-title">Upgrade <span style="font-size:13px;background:rgba(0,0,0,0.22);padding:3px 8px;border-radius:8px">' + state.chance.toFixed(0) + '%</span></div>' +
+            '<div class="banner-sub">Choose a dream gift</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="two-col">' +
+          '<div class="game-tile tile-mines" onclick="openMines()"><div class="tile-title">Mines</div><div class="tile-sub">Dodge the mines</div></div>' +
+          '<div class="game-tile tile-spins" onclick="openCaseById(\'pepe\')"><div style="display:flex;justify-content:space-between;align-items:center"><span class="tile-title">Spins</span><span class="pill-badge" style="font-size:10px">ⓘ NEW</span></div><div class="tile-sub">Match the gifts</div></div>' +
+          '<div class="game-tile tile-plinko" onclick="quickWin(\'PLINKO\', 3.5)"><div class="tile-title">Plinko</div><div class="tile-sub">Win up to 1000x</div></div>' +
+          '<div class="game-tile tile-dice" onclick="quickWin(\'DICE\', 2.0)"><div class="tile-title">Dice</div><div class="tile-sub">Higher or Lower</div></div>' +
+        '</div>' +
+        '<div class="section-hdr"><span>🎁 Cases</span><span style="font-size:12px;color:#a1a1aa">Tap to open</span></div>' +
+        '<div class="two-col">' + casesHtml + '</div>'
+      );
+    }
+
+    function quickWin(gameName, reward) {
+      state.balance += reward;
+      updateBalanceUI();
+      showToast(gameName + ": +" + reward + " 💎 demo win!");
+    }
+
+    function openCaseById(id) {
+      const found = CASES_CATALOG.find(function(x) { return x.id === id; }) || CASES_CATALOG[0];
+      state.selectedCase = found;
+      state.screen = "case";
+      render();
+    }
+
+    function renderCaseScreen() {
+      const c = state.selectedCase;
+      const stripItems = c.items.concat(c.items, c.items, c.items);
+      const trackHtml = stripItems.map(function(em, i) {
+        return '<div class="r-item"><div>' + em + '</div><span>#' + (i + 1) + '</span></div>';
+      }).join("");
+
+      const colHtml = GIFTS_CATALOG.slice(5, 9).map(function(g) {
+        return (
+          '<div class="case-card" style="padding:10px">' +
+            '<div style="display:flex;justify-content:flex-end"><span class="price-chip" style="background:#27272f">' + g.price.toFixed(2) + ' 💎</span></div>' +
+            '<div style="font-size:34px;text-align:center;margin:4px 0">' + g.emoji + '</div>' +
+            '<div style="font-size:12px;font-weight:700;text-align:center">' + g.name + '</div>' +
+          '</div>'
+        );
+      }).join("");
+
+      return (
+        '<div class="panel">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+            '<strong style="font-size:18px">' + c.name + '</strong>' +
+            '<span class="price-chip">' + c.price + ' 💎</span>' +
+          '</div>' +
+          '<div class="roulette-box">' +
+            '<div class="roulette-line"></div>' +
+            '<div class="roulette-track" id="rouletteTrack" style="transform:translateX(0px)">' + trackHtml + '</div>' +
+          '</div>' +
+          '<button class="cta-orange" onclick="spinCase()">👛 Open Case (' + c.price + ' 💎)</button>' +
+          '<div style="font-size:14px;font-weight:800;margin-bottom:8px">📦 Collections in this Box</div>' +
+          '<div class="two-col">' + colHtml + '</div>' +
+        '</div>'
+      );
+    }
+
+    function spinCase() {
+      const c = state.selectedCase;
+      if (state.balance < c.price) {
+        addFreeBalance(50);
+      }
+      state.balance -= c.price;
+      updateBalanceUI();
+
+      const track = document.getElementById("rouletteTrack");
+      if (track) {
+        track.style.transition = "none";
+        track.style.transform = "translateX(0px)";
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            track.style.transition = "transform 2.1s cubic-bezier(0.14, 0.86, 0.22, 1)";
+            track.style.transform = "translateX(-620px)";
+          });
+        });
+      }
+
+      setTimeout(function() {
+        const won = GIFTS_CATALOG[Math.floor(Math.random() * GIFTS_CATALOG.length)];
+        state.backpack.push(Object.assign({}, won, { uid: "u_" + Date.now() }));
+        showToast("Won " + won.emoji + " " + won.name + " (" + won.price + " 💎)!");
+      }, 2150);
+    }
+
+    function openUpgrade() {
+      state.screen = "upgrade";
+      render();
+    }
+
+    function setChance(val) {
+      state.chance = val;
+      render();
+    }
+
+    function openSelectGiftsModal() {
+      const sheet = document.getElementById("modalSheet");
+      const grid = state.backpack.map(function(item) {
+        const active = state.upgradeSelectedIds.indexOf(item.uid) >= 0;
+        return (
+          '<div class="gift-card ' + (active ? "selected" : "") + '" onclick="toggleSelectGift(\'' + item.uid + '\')">' +
+            '<span class="gift-price">' + item.price.toFixed(2) + ' 💎</span>' +
+            '<div class="gift-emoji">' + item.emoji + '</div>' +
+            '<div class="gift-name">' + item.name + '</div>' +
+          '</div>'
+        );
+      }).join("");
+
+      sheet.innerHTML =
+        '<div class="modal-head"><strong>Select gifts (up to 6)</strong><button class="close-btn" onclick="closeModal()">✕</button></div>' +
+        '<div class="gift-grid">' + grid + '</div>' +
+        '<button class="cta-green" style="margin-top:14px" onclick="closeModal();render()">Confirm (' + state.upgradeSelectedIds.length + ' selected)</button>';
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+
+    function toggleSelectGift(uid) {
+      const idx = state.upgradeSelectedIds.indexOf(uid);
+      if (idx >= 0) {
+        state.upgradeSelectedIds.splice(idx, 1);
+      } else if (state.upgradeSelectedIds.length < 6) {
+        state.upgradeSelectedIds.push(uid);
+      } else {
+        showToast("Max 6 gifts allowed");
+      }
+      openSelectGiftsModal();
+    }
+
+    function openSelectTargetModal() {
+      const sheet = document.getElementById("modalSheet");
+      const grid = GIFTS_CATALOG.map(function(g) {
+        const active = state.targetGift && state.targetGift.id === g.id;
+        return (
+          '<div class="gift-card ' + (active ? "selected" : "") + '" onclick="pickTarget(\'' + g.id + '\')">' +
+            '<span class="gift-price">' + g.price.toFixed(2) + ' 💎</span>' +
+            '<div class="gift-emoji">' + g.emoji + '</div>' +
+            '<div class="gift-name">' + g.name + '</div>' +
+          '</div>'
+        );
+      }).join("");
+
+      sheet.innerHTML =
+        '<div class="modal-head"><strong>Select Target Gift</strong><button class="close-btn" onclick="closeModal()">✕</button></div>' +
+        '<div class="gift-grid">' + grid + '</div>';
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+
+    function pickTarget(id) {
+      const found = GIFTS_CATALOG.find(function(g) { return g.id === id; });
+      if (found) state.targetGift = found;
+      closeModal();
+      render();
+    }
+
+    function renderUpgradeScreen() {
+      const selectedItems = state.backpack.filter(function(x) {
+        return state.upgradeSelectedIds.indexOf(x.uid) >= 0;
+      });
+      const totalIn = selectedItems.reduce(function(s, x) { return s + x.price; }, 0);
+      const labelRisk = state.chance >= 50 ? "HIGH" : "LOW";
+      const presets = [10, 20, 35, 50, 55, 75].map(function(p) {
+        return '<button class="preset-btn ' + (Math.round(state.chance) === p ? "active" : "") + '" onclick="setChance(' + p + ')">' + p + '%</button>';
+      }).join("");
+
+      return (
+        '<div class="panel">' +
+          '<div class="dial-wrap" style="--pct:' + state.chance + ';--needle:' + state.needleDeg + 'deg">' +
+            '<div class="dial-pointer"></div>' +
+            '<div class="dial-ring"></div>' +
+            '<div class="dial-center">' +
+              '<div class="chance-num">' + state.chance.toFixed(1) + '%</div>' +
+              '<div class="chance-sub">' + labelRisk + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="upg-slots">' +
+            '<div class="slot-box" onclick="openSelectGiftsModal()">' +
+              '<div style="font-size:22px">' + (selectedItems.length ? selectedItems.map(function(i) { return i.emoji; }).join("") : "+") + '</div>' +
+              '<div style="font-size:12px;font-weight:700;color:#4ade80;margin-top:4px">' +
+                (selectedItems.length ? (selectedItems.length + " Gifts (" + totalIn.toFixed(2) + " 💎)") : "Select Gifts") +
+              '</div>' +
+              '<div style="font-size:10px;color:#9a9aa6">From your backpack</div>' +
+            '</div>' +
+            '<div class="slot-arrow">→</div>' +
+            '<div class="slot-box" onclick="openSelectTargetModal()">' +
+              '<div style="font-size:28px">' + state.targetGift.emoji + '</div>' +
+              '<div style="font-size:12px;font-weight:700;margin-top:4px">' + state.targetGift.name + '</div>' +
+              '<div style="font-size:11px;color:#38bdf8">' + state.targetGift.price.toFixed(2) + ' 💎</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="preset-row">' + presets + '</div>' +
+          '<button class="cta-green" ' + (state.isSpinning ? "disabled" : "") + ' onclick="runUpgrade()">' +
+            (state.isSpinning ? "Upgrading..." : "⌃ Upgrade") +
+          '</button>' +
+        '</div>'
+      );
+    }
+
+    function runUpgrade() {
+      if (state.isSpinning) return;
+      state.isSpinning = true;
+      state.needleDeg += 360 * 3 + Math.floor(Math.random() * 359);
+      render();
+
+      setTimeout(function() {
+        state.isSpinning = false;
+        const won = state.targetGift;
+        state.backpack = state.backpack.filter(function(x) {
+          return state.upgradeSelectedIds.indexOf(x.uid) < 0;
+        });
+        state.upgradeSelectedIds = [];
+        state.backpack.push(Object.assign({}, won, { uid: "u_" + Date.now() }));
+
+        const sheet = document.getElementById("modalSheet");
+        sheet.innerHTML =
+          '<div class="modal-head"><strong>Upgrade Result</strong><button class="close-btn" onclick="closeModal()">✕</button></div>' +
+          '<div style="text-align:center;padding:8px 0 14px">' +
+            '<div style="font-size:22px;font-weight:900">Upgrade Successful!</div>' +
+            '<div style="font-size:13px;color:#a1a1aa;margin-top:4px">Congratulations! Your gift has been upgraded.</div>' +
+            '<div style="font-size:64px;margin:14px 0">' + won.emoji + '</div>' +
+            '<div style="font-size:18px;font-weight:800">' + won.name + '</div>' +
+            '<div style="font-size:15px;font-weight:700;color:#38bdf8;margin:4px 0 14px">💎 ' + won.price.toFixed(2) + '</div>' +
+            '<button class="cta-green" style="margin-bottom:8px" onclick="sellGiftValue(' + won.price + ')">Sell for ' + won.price.toFixed(2) + ' 💎</button>' +
+            '<button class="cta-orange" style="margin-bottom:8px" onclick="closeModal();openUpgrade()">Upgrade Again</button>' +
+            '<button class="preset-btn" style="width:100%;padding:12px" onclick="closeModal();render()">Keep Gift</button>' +
+          '</div>';
+        document.getElementById("modalBackdrop").classList.add("open");
+        render();
+      }, 1650);
+    }
+
+    function sellGiftValue(price) {
+      state.balance += price;
+      state.backpack.pop();
+      updateBalanceUI();
+      closeModal();
+      render();
+      showToast("Sold for +" + price.toFixed(2) + " 💎");
+    }
+
+    function openMines() {
+      state.screen = "mines";
+      state.minesGrid = Array.from({ length: 9 }, function(_, i) { return i === 4 ? "bomb" : "gem"; });
+      state.minesOpened = [];
+      state.minesActive = true;
+      state.minesMult = 1.0;
+      render();
+    }
+
+    function clickMine(idx) {
+      if (!state.minesActive || state.minesOpened.indexOf(idx) >= 0) return;
+      state.minesOpened.push(idx);
+      if (state.minesGrid[idx] === "bomb") {
+        state.minesActive = false;
+        showToast("💥 Mine hit! Try again");
+      } else {
+        state.minesMult = +(state.minesMult * 1.25).toFixed(2);
+        state.balance += 1.5;
+        updateBalanceUI();
+        showToast("💎 Safe! +1.5 💎 (" + state.minesMult + "x)");
+      }
+      render();
+    }
+
+    function renderMinesScreen() {
+      const cells = state.minesGrid.map(function(type, i) {
+        const opened = state.minesOpened.indexOf(i) >= 0;
+        const icon = opened ? (type === "bomb" ? "💣" : "💎") : "❓";
+        const cls = opened ? (type === "bomb" ? "boom" : "safe") : "";
+        return '<div class="mine-cell ' + cls + '" onclick="clickMine(' + i + ')">' + icon + '</div>';
+      }).join("");
+
+      return (
+        '<div class="panel">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<strong>💣 Mines (' + state.minesMult + 'x)</strong>' +
+            '<button class="preset-btn" onclick="openMines()">New Round</button>' +
+          '</div>' +
+          '<div class="mines-grid">' + cells + '</div>' +
+        '</div>'
+      );
+    }
+
+    function renderTabScreen() {
+      if (state.tab === "backpack") {
+        const items = state.backpack.map(function(g) {
+          return (
+            '<div class="gift-card">' +
+              '<span class="gift-price">' + g.price.toFixed(2) + ' 💎</span>' +
+              '<div class="gift-emoji">' + g.emoji + '</div>' +
+              '<div class="gift-name">' + g.name + '</div>' +
+            '</div>'
+          );
+        }).join("");
+        return '<div class="panel"><strong>📦 Backpack (' + state.backpack.length + ')</strong><div class="gift-grid">' + items + '</div></div>';
+      }
+      if (state.tab === "invite") {
+        return (
+          '<div class="panel">' +
+            '<strong>👥 Invite Friends</strong>' +
+            '<p style="font-size:13px;color:#a1a1aa">Share demo invite link and earn bonus diamonds.</p>' +
+            '<button class="cta-green" onclick="addFreeBalance(20)">Claim +20 💎 Referral Bonus</button>' +
+          '</div>'
+        );
+      }
+      if (state.tab === "leaderboard") {
+        return (
+          '<div class="panel">' +
+            '<strong>🏆 Top Players</strong>' +
+            '<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;font-size:13px">' +
+              '<div style="display:flex;justify-content:space-between"><span>🥇 Alex_Gift</span><strong>1,420 💎</strong></div>' +
+              '<div style="display:flex;justify-content:space-between"><span>🥈 NovaStar</span><strong>980 💎</strong></div>' +
+              '<div style="display:flex;justify-content:space-between"><span>🥉 You (Demo)</span><strong>' + formatBal(state.balance) + ' 💎</strong></div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+      return (
+        '<div class="panel">' +
+          '<strong>🪙 Earn Free Diamonds</strong>' +
+          '<p style="font-size:13px;color:#a1a1aa">Complete demo tasks to top up your balance for free.</p>' +
+          '<button class="cta-green" onclick="addFreeBalance(30)">Complete Task (+30 💎)</button>' +
+        '</div>'
+      );
+    }
+
+    function render() {
+      const container = document.getElementById("viewContainer");
+      if (!container) return;
+      if (state.screen === "home") container.innerHTML = renderHome();
+      else if (state.screen === "case") container.innerHTML = renderCaseScreen();
+      else if (state.screen === "upgrade") container.innerHTML = renderUpgradeScreen();
+      else if (state.screen === "mines") container.innerHTML = renderMinesScreen();
+      else container.innerHTML = renderTabScreen();
+    }
+
+    function initApp() {
+      renderLiveStrip();
+      updateBalanceUI();
+      render();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
